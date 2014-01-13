@@ -1,0 +1,70 @@
+#output
+{
+    background-color: #ccc;
+    width: 306px;
+    margin: 10px 0 0 0;
+    padding: 0;
+    list-style-type: square;
+}
+#output li
+{
+    margin-left: 20px;
+}
+#output li span
+{
+    padding-left: 16px;
+}
+.output li .abort
+{
+    margin-left: 5px;
+}
+#output li.success .abort, #output li.aborted .abort, #output li.error .abort {
+    display: none;
+}
+#output li.enqueued .title
+{
+    color: cornflowerblue;
+    background: url(/images/doc.png) left no-repeat;
+}
+#output li.uploading .title
+{
+    font-weight: bold;
+    background: url(/images/up.png) left no-repeat;
+}
+#output li.success .title
+{
+    color: mediumseagreen;
+    background: url(/images/ok.png) left no-repeat;
+    display: block;
+}
+#output li.aborted .title
+{
+    color: grey;
+    background: url(/images/fail.png) left no-repeat;
+}
+#output li.error .title
+{
+    color: firebrick;
+    background: url(/images/fail.png) left no-repeat;
+}
+#output li.aborted .abort, #output li.success .abort, #output li.error .abort
+{
+    display: none;
+}
+#output li.aborted .progress, #output li.success .progress, #output li.error .progress
+{
+    display: none;
+}
+#output .progress
+{
+    width: 100px;
+    height: 10px;
+    border: 1px solid #ccc;
+}
+#output .progress .bar
+{
+    width: 0;
+    height: 100%;
+    background-color: #00f;
+}
+
