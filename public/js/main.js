@@ -7,9 +7,15 @@ $(function () {
         enqueued: function (item) {
             item.idx = ++numFiles;
             var $li = $('<tr>').addClass('item_' + item.idx);
-            $li.append($('<td>').text(item.idx + ''));
-            $li.append($('<td>').addClass('enqueued title').text(item.getFilename()).append($('<div>').addClass('progress').append($('<div>').addClass('progress-bar progress-bar-success'))));
-            $li.append($('<td class="volume">').text('?'));
+            $li.append($('<td>').addClass('enqueued title')
+                .append($('<a>').addClass('play').text(item.getFilename()))
+                .append($('<div>').addClass('progress')
+                .append($('<div>').addClass('progress-bar progress-bar-success'))));
+            $li.append($('<td>').addClass('volume')
+                .append($('<label>').val('Volume')
+                .append($('<input>').attr('size', 4))));
+            $li.append($('<td>').addClass('actions')
+                .append($('<a>').addClass('remove').text('remove')));
             $lis[item.id] = $li;
             $('#output .file-table').append($li);
         },
@@ -23,14 +29,22 @@ $(function () {
         progress: function (item, loaded, total) {
             $lis[item.id].find('.progress .progress-bar-success').css('width', Math.round(loaded / total * 100) + '%');
         },
-        success: function (item) {
+        success: function (item, xhr) {
+            var url = JSON.parse(xhr.responseText).url;
+            if (url && url !== '') {
+                $('.item_' + item.idx + ' .title').append($('<audio>').attr({
+                    'id': item.getFilename(),
+                    'src': url,
+                    'preload': 'auto'
+                }));
+            }
             $lis[item.id].removeClass('uploading');
             $('.panel-footer').show();
-            // spawn volume analyzer script
+            // request volume analysis from server
             $.ajax('/analyze/' + item.getFilename())
                 .done(function (data) {
                     if (data.result) {
-                        $('tr.item_' + item.idx + ' .volume').text(data.volumes);
+                        $('tr.item_' + item.idx + ' .volume input').val(data.volumes);
                     }
                 });
         },
@@ -47,10 +61,23 @@ $(function () {
         return false;
     });
     $('.panel-footer').hide();
+    // make audio selections sortable
+    $('.sortable').sortable({
+        revert: true
+    });
     $('.generate').on('click', function () {
         alert('generating sprite');
     });
+    // reload page on clear button
     $('.clear').on('click', function () {
         window.document.location.reload();
+    });
+    // audio plays on filename click
+    $('.table').on('click', '.play', function (el) {
+        var audio = $('audio', this.parentElement)[0];
+        if (audio) {
+            audio.play();
+        }
+        event.stopPropagation();
     });
 });

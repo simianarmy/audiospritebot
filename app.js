@@ -27,6 +27,7 @@ app.configure(function(){
     app.use(express.session());
     app.use(express.static(path.join(__dirname, 'public')));
     app.set('toolsDir', path.join(__dirname, 'tools'));
+    app.set('uploadsDir', 'uploads');
     //app.use(partials());
 });
 
@@ -42,11 +43,10 @@ app.configure('development', function(){
  * File upload handler
  */
 app.post('/upload', function(req, res) {
-    console.log('got upload data');
     // parse a file upload
     var form = new formidable.IncomingForm(),
         files = [];
-    form.uploadDir = process.cwd() + '/uploads';
+    form.uploadDir = path.join(process.cwd(), 'public', app.get('uploadsDir'));
     form.keepExtensions = true;
 
     form.on('file', function(name, file) {
@@ -59,6 +59,7 @@ app.post('/upload', function(req, res) {
         res.writeHead(200, {'content-type': 'application/json'});
         res.end(JSON.stringify({result: true, 
             filename: files[0].name,
+            url: path.join(app.get('uploadsDir'), path.basename(files[0].path)),
             size: files[0].size
         }));
     });

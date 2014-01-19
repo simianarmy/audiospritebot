@@ -1,5 +1,5 @@
 {
-  "name": "audiospritemaker",
+  "name": "audiospritebot",
   "version": "0.1.0",
   "description": "Create audio sprites from a web interface",
   "main": "app.js",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/simianarmy/audiospriter"
+    "url": "https://github.com/simianarmy/audiospritebot"
   },
   "keywords": [
     "webaudio",
@@ -24,7 +24,7 @@
   "author": "Marc Mauger",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/simianarmy/audiospriter/issues"
+    "url": "https://github.com/simianarmy/audiospritebot/issues"
   },
   "engines": {
       "node": "0.10.x"

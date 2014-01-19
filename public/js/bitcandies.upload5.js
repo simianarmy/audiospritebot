@@ -64,11 +64,15 @@ bitcandies.FileUploader.QueuedFile = function (uploader, file, params, id) {
     this.params = params || {};
     this.id = id;
     this.status = bitcandies.FileUploader.Statuses.QUEUED;
-}
+};
 
 bitcandies.FileUploader.QueuedFile.prototype = {
     getFilename: function () {
         return this.file.fileName ? this.file.fileName : this.file.name;
+    },
+
+    getFileURL: function () {
+        return this.file.url ? this.file.url : this.file.name;
     },
 
     getSize: function () {
