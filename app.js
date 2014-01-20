@@ -76,9 +76,18 @@ app.get('/analyze/:filename', function (req, res) {
     var cmd = 'python ' + app.get('toolsDir') + '/audiovolume.py ' + path;
     console.log(cmd);
     exec(cmd, function (error, stdout, stderr) {
-        var info = error ? -1 : stdout;
+        var info = error ? -1 : stdout.split(','),
+            data = {};
+
+        data.result = error !== undefined;
+
+        if (info !== -1) {
+            data.rms = info[0];
+            data.max = info[1];
+            data.max_amp = info[2];
+        }
         res.writeHead(200, {'content-type': 'application/json'});
-        res.end(JSON.stringify({result: error !== undefined, volumes: info}));
+        res.end(JSON.stringify(data));
     });
 });
 
@@ -89,6 +98,8 @@ app.post('/generate', function (req, res) {
     // Get list of audio files with volumes from request
     // Generate arguments to python script and execute
     // Send results back to client for download
+    res.writeHead(200, {'content-type': 'application/json'});
+    res.end(JSON.stringify({success: true}));
 });
 
 http.createServer(app).listen(app.get('port'), function(){

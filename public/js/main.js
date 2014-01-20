@@ -1,4 +1,12 @@
 $(function () {
+    function refreshState () {
+        if ($('.table tr').length <= 1) {
+            $('.commands').hide();
+        } else {
+            $('.commands').show();
+        }
+    }        
+
     var $lis = {};
     var numFiles = 0;
     var uploader = new bitcandies.FileUploader({
@@ -6,7 +14,7 @@ $(function () {
 
         enqueued: function (item) {
             item.idx = ++numFiles;
-            var $li = $('<tr>').addClass('item_' + item.idx);
+            var $li = $('<tr>').addClass('item item_' + item.idx);
             $li.append($('<td>').addClass('enqueued title')
                 .append($('<a>').addClass('play').text(item.getFilename()))
                 .append($('<div>').addClass('progress')
@@ -39,12 +47,12 @@ $(function () {
                 }));
             }
             $lis[item.id].removeClass('uploading');
-            $('.panel-footer').show();
+            refreshState();
             // request volume analysis from server
             $.ajax('/analyze/' + item.getFilename())
                 .done(function (data) {
                     if (data.result) {
-                        $('tr.item_' + item.idx + ' .volume input').val(data.volumes);
+                        $('tr.item_' + item.idx + ' .volume input').val(data.rms);
                     }
                 });
         },
@@ -65,8 +73,28 @@ $(function () {
     $('.sortable').sortable({
         revert: true
     });
+    // the meaty one
     $('.generate').on('click', function () {
-        alert('generating sprite');
+        // Send ordered file list with volumes as form data
+        var files = [],
+            volumes = [];
+
+        $('.file-table tr').each(function (index) {
+            files.push($('a.play', this).text());
+            volumes.push($('td.volume input', this).val());
+        });
+        console.log('files', files);
+        console.log('volumes', volumes);
+        // send it off
+        $.post('/generate', {files: files, volumes: volumes}, function (res) {
+            console.log('ajax response', res);
+        })
+        .done(function() {
+            alert( "second success" );
+        })
+        .fail(function() {
+            alert( "error" );
+        });
     });
     // reload page on clear button
     $('.clear').on('click', function () {
@@ -79,5 +107,9 @@ $(function () {
             audio.play();
         }
         event.stopPropagation();
+    });
+    $('table').on('click', '.remove', function (el) {
+        $(this).parents('.item').remove();
+        refreshState();
     });
 });
