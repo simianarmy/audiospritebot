@@ -47,6 +47,7 @@ $(function () {
                 }));
             }
             $lis[item.id].removeClass('uploading');
+            $('.item_' + item.idx + ' .progress').remove();
             refreshState();
             // request volume analysis from server
             $.ajax('/analyze/' + item.getFilename())
@@ -85,16 +86,8 @@ $(function () {
         });
         console.log('files', files);
         console.log('volumes', volumes);
-        // send it off
-        $.post('/generate', {files: files, volumes: volumes}, function (res) {
-            console.log('ajax response', res);
-        })
-        .done(function() {
-            alert( "second success" );
-        })
-        .fail(function() {
-            alert( "error" );
-        });
+        // send it off - not AJAX
+        window.location='/generate?' + $.param({files: files, volumes: volumes});
     });
     // reload page on clear button
     $('.clear').on('click', function () {

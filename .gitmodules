@@ -1,0 +1,3 @@
+[submodule "audiosprite"]
+	path = audiosprite
+	url = git@github.com:simianarmy/audiospriter.git

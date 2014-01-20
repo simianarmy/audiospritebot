@@ -7,11 +7,15 @@ var express = require('express'),
     path = require('path'),
     url = require('url'),
     util = require('util'),
+    fs = require('fs'),
+    temp = require('temp'),
     formidable = require('formidable'),
     exec = require('child_process').exec;
 
 var app = express(),
     uploadsFilePathMap = {};
+
+temp.track(); // for temp cleanup
 
 app.configure(function(){
     app.set('port', process.env.PORT || 3000);
@@ -50,6 +54,11 @@ app.post('/upload', function(req, res) {
     form.keepExtensions = true;
 
     form.on('file', function(name, file) {
+        // Keep original name on disk
+        var newPath = path.join(form.uploadDir, file.name);
+
+        fs.renameSync(file.path, newPath);
+        file.path = newPath;
         files.push(file);
     })
     .on('end', function() {
@@ -94,12 +103,40 @@ app.get('/analyze/:filename', function (req, res) {
 /**
  * Sprite creator
  */
-app.post('/generate', function (req, res) {
+app.get('/generate', function (req, res) {
     // Get list of audio files with volumes from request
-    // Generate arguments to python script and execute
-    // Send results back to client for download
-    res.writeHead(200, {'content-type': 'application/json'});
-    res.end(JSON.stringify({success: true}));
+    var filenames = req.query.files,
+        volumes = req.query.volumes;
+
+    temp.open({suffix: '.zip'}, function (err, info) {
+        // Generate arguments to python script and execute
+        var cmd = util.format('python %s %s -o %s -f %s -v %s', 
+            app.get('toolsDir') + '/gensprites.py',
+            'sprite',
+            info.path,
+            // unsafe input won't match our map so that's a free safety check
+            filenames.map(function (f) {
+                return uploadsFilePathMap[f];
+            }).join(' '),
+            // force form input to integers for safety
+            volumes.map(function (v) {
+                return parseInt(v, 10);
+            }).join(' '));
+        console.log(cmd);
+
+        exec(cmd, function (error, stdout, stderr) {
+            if (!error) {
+                console.log('sending for zip download...', info.path);
+                res.download(info.path, 'audiosprite.zip', function (err) {
+                    if (err) {
+                        console.log('error sending ' + info.path, err);
+                    }
+                });
+            } else {
+                temp.cleanup();
+            }
+        });
+    });
 });
 
 http.createServer(app).listen(app.get('port'), function(){
