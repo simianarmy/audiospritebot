@@ -39,6 +39,7 @@ $(function () {
         },
         success: function (item, xhr) {
             var url = JSON.parse(xhr.responseText).url;
+
             if (url && url !== '') {
                 $('.item_' + item.idx + ' .title').append($('<audio>').attr({
                     'id': item.getFilename(),
@@ -49,13 +50,16 @@ $(function () {
             $lis[item.id].removeClass('uploading');
             $('.item_' + item.idx + ' .progress').remove();
             refreshState();
-            // request volume analysis from server
-            $.ajax('/analyze/' + item.getFilename())
-                .done(function (data) {
-                    if (data.result) {
-                        $('tr.item_' + item.idx + ' .volume input').val(data.rms);
-                    }
-                });
+
+            // request volume analysis from server if audio file
+            if (item.getFilename().indexOf('.js') === -1) {
+                $.ajax('/analyze/' + item.getFilename())
+                    .done(function (data) {
+                        if (data.result) {
+                            $('tr.item_' + item.idx + ' .volume input').val(data.rms);
+                        }
+                    });
+            }
         },
         error: function (item) {
             $lis[item.id].removeClass('uploading');

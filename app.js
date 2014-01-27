@@ -13,7 +13,8 @@ var express = require('express'),
     exec = require('child_process').exec;
 
 var app = express(),
-    uploadsFilePathMap = {};
+    uploadsFilePathMap = {},
+    g_dataConfig = null;
 
 temp.track(); // for temp cleanup
 
@@ -47,42 +48,99 @@ app.configure('development', function(){
  * File upload handler
  */
 app.post('/upload', function(req, res) {
+    function isDataFile (file) {
+        return (file.indexOf('.js') !== -1);
+    }
+
+    function parseDataFile (file) {
+        // parse json
+        fs.readFile(file, function (err, data) {
+            if (!err) {
+                try {
+                    g_dataConfig = {}; // [re]initialize
+
+                    // create filename->data map
+                    var json = JSON.parse(data);
+
+                    for (var i = 0, len = json.length; i < len; i++) {
+                        g_dataConfig[json[i].url] = json[i];
+                    }
+                    console.log('read json', g_dataConfig);
+                } catch (e) {
+                    console.error('Invalid json format', e);
+                }
+            }
+        });
+    }
     // parse a file upload
     var form = new formidable.IncomingForm(),
         files = [];
+
     form.uploadDir = path.join(process.cwd(), 'public', app.get('uploadsDir'));
     form.keepExtensions = true;
 
     form.on('file', function(name, file) {
-        // Keep original name on disk
-        var newPath = path.join(form.uploadDir, file.name);
 
-        fs.renameSync(file.path, newPath);
-        file.path = newPath;
-        files.push(file);
+        if (isDataFile(file.name)) {
+            parseDataFile(file.path);
+        } else {
+            // otherwise its a sound file  
+            // Keep original name on disk
+            var newPath = path.join(form.uploadDir, file.name);
+
+            fs.renameSync(file.path, newPath);
+            file.path = newPath;
+            files.push(file);
+        }
     })
     .on('end', function() {
-        // Save name->path for analyzing by name
-        uploadsFilePathMap[files[0].name] = files[0].path;
-
         res.writeHead(200, {'content-type': 'application/json'});
-        res.end(JSON.stringify({result: true, 
-            filename: files[0].name,
-            url: path.join(app.get('uploadsDir'), path.basename(files[0].path)),
-            size: files[0].size
-        }));
+
+        // Save name->path for analyzing by name
+        if (files.length > 0) {
+            uploadsFilePathMap[files[0].name] = files[0].path;
+
+            res.end(JSON.stringify({result: true, 
+                filename: files[0].name,
+                url: path.join(app.get('uploadsDir'), path.basename(files[0].path)),
+                size: files[0].size
+            }));
+        } else {
+            res.end(JSON.stringify({result: false}));
+        }
     });
     form.parse(req);
 });
 
 app.get('/analyze/:filename', function (req, res) {
-    var path = uploadsFilePathMap[req.params.filename];
-    if (!path) {
+
+    function lookupDataConfigEntryByFilename(filename) {
+        if (!g_dataConfig) {
+            return null;
+        }
+        var val = g_dataConfig[filename],
+            ext = path.extname(filename);
+
+        if (!val) { // try it without the extension
+            val = g_dataConfig[path.basename(filename, ext)];
+        }
+        return val ? val : null;
+    }
+    var fpath = uploadsFilePathMap[req.params.filename];
+    if (!fpath) {
         res.writeHead(404, {'content-type': 'text/html'});
         res.end('file not found');
         return;
     }
-    var cmd = 'python ' + app.get('toolsDir') + '/audiovolume.py ' + path;
+    // If we have a data configuration, check it for a matching entry
+    var match = lookupDataConfigEntryByFilename(req.params.filename);
+    console.log('match for ' + req.params.filename, match);
+    if (match !== null) {
+        res.writeHead(200, {'content-type': 'application/json'});
+        res.end(JSON.stringify({result: true, rms: match.volume}));
+        return;
+    }
+    var cmd = 'python ' + app.get('toolsDir') + '/audiovolume.py ' + fpath;
     console.log(cmd);
     exec(cmd, function (error, stdout, stderr) {
         var info = error ? -1 : stdout.split(','),
