@@ -164,7 +164,8 @@ app.get('/analyze/:filename', function (req, res) {
 app.get('/generate', function (req, res) {
     // Get list of audio files with volumes from request
     var filenames = req.query.files,
-        volumes = req.query.volumes;
+        volumes = req.query.volumes,
+        addSourceFiles = req.query.genSource === 'true';
 
     temp.open({suffix: '.zip'}, function (err, info) {
         // Generate arguments to python script and execute
@@ -180,6 +181,10 @@ app.get('/generate', function (req, res) {
             volumes.map(function (v) {
                 return parseInt(v, 10);
             }).join(' '));
+        
+        if (addSourceFiles) {
+            cmd = cmd + ' -s';
+        }
         console.log(cmd);
 
         exec(cmd, function (error, stdout, stderr) {

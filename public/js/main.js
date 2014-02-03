@@ -91,7 +91,10 @@ $(function () {
         console.log('files', files);
         console.log('volumes', volumes);
         // send it off - not AJAX
-        window.location='/generate?' + $.param({files: files, volumes: volumes});
+        window.location='/generate?' + $.param({files: files, 
+            volumes: volumes, 
+            genSource: $('#gen-source').is(':checked')
+        });
     });
     // reload page on clear button
     $('.clear').on('click', function () {

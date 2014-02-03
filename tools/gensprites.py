@@ -59,11 +59,12 @@ def compress(outfile, dirname):
 
     return True
 
-def generate(name, outfile, files=[], volumes=[]):
+def generate(name, outfile, files=[], volumes=[], addSource=False):
 
     #print 'id: ' + name
     #print files
     #print volumes
+    #print addSource
     sprite = AudioSprite(name)
 
     for idx in range(0, len(files)):
@@ -72,7 +73,7 @@ def generate(name, outfile, files=[], volumes=[]):
     outdir = tempfile.mkdtemp(suffix=name)
     print 'zipping ' + outdir + '  to ' + outfile
 
-    return sprite.save(outdir, name) and compress(outfile, outdir)
+    return sprite.save(outdir, name, save_source=addSource) and compress(outfile, outdir)
 
 def main():
 
@@ -82,9 +83,10 @@ def main():
     parser.add_argument('-o', '--outfile', help='output zip file')
     parser.add_argument('-f', '--file', nargs='+', help='source file paths')
     parser.add_argument('-v', '--volume', type=int, nargs='+', help='source file volumes')
+    parser.add_argument('-s', '--source', action="store_true", help='include generated source files')
     args = parser.parse_args()
 
-    generate(args.name, args.outfile, files=args.file, volumes=args.volume)
+    generate(args.name, args.outfile, files=args.file, volumes=args.volume, addSource=args.source)
     return 0
     
 if __name__ == "__main__":
