@@ -67,6 +67,7 @@ def generate(name, outfile, files=[], volumes=[], addSource=False, silenceLen=0)
     #print volumes
     #print addSource
     sprite = AudioSprite(name)
+    sprite.setMaxAudioLevel(max(volumes)) # XXX: assumes normalized inputs
     if silenceLen > 0:
         sprite.setSilence(True, silenceLen)
 
@@ -76,7 +77,7 @@ def generate(name, outfile, files=[], volumes=[], addSource=False, silenceLen=0)
     outdir = tempfile.mkdtemp(suffix=name)
 
     print "Generating sprites..."
-    if not sprite.save(outdir, name, save_source=addSource):
+    if not sprite.save(outdir, name, save_source=addSource, bitrate='64k'):
         raise "Failed to generate sprites"
     
     print 'zipping ' + outdir + '  to ' + outfile

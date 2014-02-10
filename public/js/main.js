@@ -1,9 +1,9 @@
 $(function () {
     function refreshState () {
-        if (false && $('.table tr').length <= 1) {
-            $('.commands').hide();
+        if ($('.table tr').length <= 1) {
+            $('fieldset').attr('disabled', '1');
         } else {
-            $('.commands').show();
+            $('fieldset').removeAttr('disabled');
         }
     }        
 
@@ -97,7 +97,8 @@ $(function () {
             volumes: volumes, 
             genSource: $('#gen-source').is(':checked'),
             silence: $('#gen-silence').is(':checked'),
-            silenceLen: parseInt($('#silence-len').val(), 10)
+            silenceLen: parseInt($('#silence-len').val(), 10),
+            formats: $("input:radio[name ='formats']:checked").val()
         });
     });
     // reload page on clear button
@@ -116,4 +117,5 @@ $(function () {
         $(this).parents('.item').remove();
         refreshState();
     });
+    refreshState();
 });

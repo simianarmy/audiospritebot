@@ -5,6 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- Bootstrap -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            .checkbox-inline input[type="checkbox"] {
+                float: none;
+            }
+        </style>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -21,9 +26,9 @@
         <div class="container">
             <div class="hidden alert alert-success"></div>
             <div class="hidden alert alert-info"></div>
-            <form id="file_form" enctype="multipart/form-data" method="post">
+            <form id="file_form" enctype="multipart/form-data" method="post" role="form">
                 <div class="input-group">
-                    <input type="file" multiple="multiple" id="file" class="btn btn-default" />
+                    <input type="file" multiple="multiple" id="file" class="form-control btn btn-primary" />
                 </div>
                 
                 <div id="output" class="panel panel-default">
@@ -42,20 +47,31 @@
                     </table>
                 </div>
                 <div class="commands panel-footer">
-                    <label class="checkbox">
-                        <input id="gen-source" type="checkbox" checked="checked"> Generate Source Files
-                    </label>
-                    <label class="checkbox">
-                        <input id="gen-silence" type="checkbox" checked="checked"> Add Silence Between Tracks&nbsp;&nbsp; 
-                        <input id="silence-len" type="text" size="4" value="1000">&nbsp;&nbsp;Milliseconds
-                    </label>
-                    <!--
-                    <label class="radio">
-                        <input type="radio" name="formats" value="mp3">MP3
-                    </label>
-                    -->
-                    <input type="button" class="generate btn btn-default btn-large" value="Generate Sprite"/>
-                    <input type="button" class="clear btn btn-default" value="Clear"/>
+                    <fieldset>
+                        <legend>Options</legend>
+                        <div class="form-group">
+                            <input id="gen-source" type="checkbox" checked="checked"> Generate Source Files
+                            <br/>
+                            <input id="gen-silence" type="checkbox" checked="checked"> Add Silence Between Tracks&nbsp;&nbsp; 
+                            <input id="silence-len" type="text" size="4" value="1000">&nbsp;&nbsp;Milliseconds
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Generated Audio Formats</legend>
+                        <div class="form-group">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="formats" value="mp3" checked="checked"> mp3
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="formats" value="ogg" checked="checked"> ogg
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="formats" value="m4a" checked="checked"> m4a
+                            </label>
+                        </div>
+                        <input type="button" class="generate btn btn-primary btn-large" value="Generate Sprite"/>
+                        <input type="button" class="clear btn btn-default btn-small" value="Clear"/>
+                    </fieldset>
                 </div>
             </form>
             </div>
