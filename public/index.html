@@ -42,9 +42,18 @@
                     </table>
                 </div>
                 <div class="commands panel-footer">
-                    <div class="panel input-group">
+                    <label class="checkbox">
                         <input id="gen-source" type="checkbox" checked="checked"> Generate Source Files
-                    </div>
+                    </label>
+                    <label class="checkbox">
+                        <input id="gen-silence" type="checkbox" checked="checked"> Add Silence Between Tracks&nbsp;&nbsp; 
+                        <input id="silence-len" type="text" size="4" value="1000">&nbsp;&nbsp;Milliseconds
+                    </label>
+                    <!--
+                    <label class="radio">
+                        <input type="radio" name="formats" value="mp3">MP3
+                    </label>
+                    -->
                     <input type="button" class="generate btn btn-default btn-large" value="Generate Sprite"/>
                     <input type="button" class="clear btn btn-default" value="Clear"/>
                 </div>

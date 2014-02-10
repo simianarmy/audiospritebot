@@ -1,6 +1,6 @@
 $(function () {
     function refreshState () {
-        if ($('.table tr').length <= 1) {
+        if (false && $('.table tr').length <= 1) {
             $('.commands').hide();
         } else {
             $('.commands').show();
@@ -32,7 +32,7 @@ $(function () {
         },
         start: function (item) {
             $lis[item.id].removeClass('enqueued').addClass('uploading');
-            $('.panel-footer').hide();
+            refreshState();
         },
         aborted: function (item) {
             $lis[item.id].removeClass('enqueued uploading').addClass('aborted');
@@ -76,7 +76,6 @@ $(function () {
         }
         return false;
     });
-    $('.panel-footer').hide();
     // make audio selections sortable
     $('.sortable').sortable({
         revert: true
@@ -96,7 +95,9 @@ $(function () {
         // send it off - not AJAX
         window.location='/generate?' + $.param({files: files, 
             volumes: volumes, 
-            genSource: $('#gen-source').is(':checked')
+            genSource: $('#gen-source').is(':checked'),
+            silence: $('#gen-silence').is(':checked'),
+            silenceLen: parseInt($('#silence-len').val(), 10)
         });
     });
     // reload page on clear button

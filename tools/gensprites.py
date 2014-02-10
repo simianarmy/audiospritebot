@@ -51,6 +51,7 @@ def compress(outfile, dirname):
     except RuntimeError:
         # Delete zip file if it exists
         #
+        print "RuntimeError zipping!  Trying again"
         if os.path.exists(outfile):
             os.unlink(outfile)
         zip = zipfile.ZipFile(outfile, 'w', zipfile.ZIP_STORED)
@@ -59,21 +60,28 @@ def compress(outfile, dirname):
 
     return True
 
-def generate(name, outfile, files=[], volumes=[], addSource=False):
+def generate(name, outfile, files=[], volumes=[], addSource=False, silenceLen=0):
 
     #print 'id: ' + name
     #print files
     #print volumes
     #print addSource
     sprite = AudioSprite(name)
+    if silenceLen > 0:
+        sprite.setSilence(True, silenceLen)
 
     for idx in range(0, len(files)):
         sprite.addAudio(files[idx], volume=volumes[idx])
 
     outdir = tempfile.mkdtemp(suffix=name)
-    print 'zipping ' + outdir + '  to ' + outfile
 
-    return sprite.save(outdir, name, save_source=addSource) and compress(outfile, outdir)
+    print "Generating sprites..."
+    if not sprite.save(outdir, name, save_source=addSource):
+        raise "Failed to generate sprites"
+    
+    print 'zipping ' + outdir + '  to ' + outfile
+    if not compress(outfile, outdir):
+        raise "Failed to compress products"
 
 def main():
 
@@ -84,9 +92,10 @@ def main():
     parser.add_argument('-f', '--file', nargs='+', help='source file paths')
     parser.add_argument('-v', '--volume', type=int, nargs='+', help='source file volumes')
     parser.add_argument('-s', '--source', action="store_true", help='include generated source files')
+    parser.add_argument('-q', '--silence', type=int, help='add silence between tracks with duration specified in milliseconds')
     args = parser.parse_args()
 
-    generate(args.name, args.outfile, files=args.file, volumes=args.volume, addSource=args.source)
+    generate(args.name, args.outfile, files=args.file, volumes=args.volume, addSource=args.source, silenceLen=args.silence)
     return 0
     
 if __name__ == "__main__":
