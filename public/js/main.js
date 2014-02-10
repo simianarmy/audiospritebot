@@ -25,7 +25,10 @@ $(function () {
             $li.append($('<td>').addClass('actions')
                 .append($('<a>').addClass('remove').text('remove')));
             $lis[item.id] = $li;
-            $('#output .file-table').append($li);
+            // don't add sprite data files
+            if (item.getFilename().indexOf('.js') === -1) {
+                $('#output .file-table').append($li);
+            }
         },
         start: function (item) {
             $lis[item.id].removeClass('enqueued').addClass('uploading');
